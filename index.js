@@ -51,6 +51,16 @@ const ALLOWED_UPDATE_FIELDS = new Set([
 ]);
 
 
+const ALLOWED_REQUEST_FIELDS = new Set([
+    "writeLocation",
+    "whyNeedFood",
+    "contactNo",
+    "userEmail",
+    "name",
+    "photoURL"
+]);
+
+
 
 app.get("/", (req, res) => {
     res.send("Mongo DB Connection Success");
@@ -62,6 +72,7 @@ async function run() {
 
         const db = client.db("FoodCycleDB");
         const foodCollection = db.collection("foods");
+        const foodRequestCollection = db.collection("foodRequest");
 
         // to get data
         app.get("/foods", async (req, res) => {
@@ -111,13 +122,31 @@ async function run() {
         });
 
 
-
         // to delete data
         app.delete("/foods/:id", async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await foodCollection.deleteOne(query);
             res.send(result);
+        });
+
+
+
+        // food request post
+        app.post("/foodRequest/:id", async (req, res) => {
+            const data = req.body;
+
+            for (const key in data) {
+                if (!ALLOWED_REQUEST_FIELDS.has(key)) {
+                    return res.status(400).json({ error: `Invalid field: ${key}` });
+                }
+            }
+
+            data.requestStatus = "pending";
+            data._id = req.params.id;
+
+            const result = await foodRequestCollection.insertOne(data);
+            res.status(201).json(result);
         });
 
 
