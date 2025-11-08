@@ -93,7 +93,7 @@ async function run() {
             res.status(201).json(result);
         });
 
-        
+
         // to update data
         app.patch("/foods/:id", async (req, res) => {
             const updates = req.body;
@@ -107,6 +107,16 @@ async function run() {
                 { $set: updates }
             );
 
+            res.send(result);
+        });
+
+
+
+        // to delete data
+        app.delete("/foods/:id", async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await foodCollection.deleteOne(query);
             res.send(result);
         });
 
