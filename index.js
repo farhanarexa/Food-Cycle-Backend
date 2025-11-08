@@ -52,7 +52,8 @@ async function run() {
 
         // to get data
         app.get("/foods", async (req, res) => {
-            const result = await foodCollection.find().toArray();
+            // const result = await foodCollection.find().toArray();
+            const result = await foodCollection.find({ available_status: true }).toArray();
             res.send(result);
         });
 
