@@ -158,7 +158,7 @@ async function run() {
 
 
 
-        //food request status update
+        //food request status update (accepted)
         app.patch("/foodRequestAccept/:id", async (req, res) => {
             const updates = req.body;
             const email = req.body.userEmail;
@@ -172,6 +172,18 @@ async function run() {
             const foods = await foodCollection.findOne(food_query)
             const food_updateDoc = { $set: { available_status: false } };
             const result = await foodCollection.updateOne(food_query, food_updateDoc);
+            res.send(result);
+        })
+
+
+        
+        //food request status update (rejected)
+        app.patch("/foodRequestReject/:id", async (req, res) => {
+            const food_request_id = req.params.id;
+            const query = { _id: new ObjectId(food_request_id) };
+            const food_req_item = await foodRequestCollection.findOne(query)
+            const food_request_updateDoc = { $set: { requestStatus: "rejected" } };
+            const result = await foodRequestCollection.updateOne(query, food_request_updateDoc);
             res.send(result);
         })
 
