@@ -143,7 +143,7 @@ async function run() {
             }
 
             data.requestStatus = "pending";
-            data._id = req.params.id;
+            data.food_id = req.params.id;
 
             const result = await foodRequestCollection.insertOne(data);
             res.status(201).json(result);
