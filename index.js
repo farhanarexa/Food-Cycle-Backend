@@ -131,6 +131,13 @@ async function run() {
         });
 
 
+        // food request get
+        app.get("/foodRequest/:id", async (req, res) => {
+            const result = await foodRequestCollection.find({ food_id: req.params.id }).toArray();
+            res.send(result);
+        });
+
+
 
         // food request post
         app.post("/foodRequest/:id", async (req, res) => {
@@ -148,6 +155,9 @@ async function run() {
             const result = await foodRequestCollection.insertOne(data);
             res.status(201).json(result);
         });
+
+
+
 
 
 
