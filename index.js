@@ -39,6 +39,19 @@ const ALLOWED_FIELDS = new Set([
     "additional_notes"
 ]);
 
+
+const ALLOWED_UPDATE_FIELDS = new Set([
+    "available_status",
+    "food_name",
+    "food_image",
+    "food_quantity",
+    "pickup_location",
+    "expire_date",
+    "additional_notes"
+]);
+
+
+
 app.get("/", (req, res) => {
     res.send("Mongo DB Connection Success");
 });
@@ -76,9 +89,25 @@ async function run() {
                     return res.status(400).json({ error: `Field "${key}" not allowed` });
                 }
             }
-
             const result = await foodCollection.insertOne(data);
             res.status(201).json(result);
+        });
+
+        
+        // to update data
+        app.patch("/foods/:id", async (req, res) => {
+            const updates = req.body;
+            for (const key in updates) {
+                if (!ALLOWED_UPDATE_FIELDS.has(key)) {
+                    return res.status(400).send(`Cannot update: ${key}`);
+                }
+            }
+            const result = await foodCollection.updateOne(
+                { _id: new ObjectId(req.params.id) },
+                { $set: updates }
+            );
+
+            res.send(result);
         });
 
 
