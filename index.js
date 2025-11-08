@@ -158,6 +158,25 @@ async function run() {
 
 
 
+        //food request status update
+        app.patch("/foodRequestAccept/:id", async (req, res) => {
+            const updates = req.body;
+            const email = req.body.userEmail;
+            const food_request_id = req.params.id;
+            const query = { _id: new ObjectId(food_request_id) };
+            const food_req_item = await foodRequestCollection.findOne(query)
+            const food_id = food_req_item.food_id;
+            const food_query = { _id: new ObjectId(food_id) };
+            const food_request_updateDoc = { $set: { requestStatus: "accepted" } };
+            const food_request_result = await foodRequestCollection.updateOne(query, food_request_updateDoc);
+            const foods = await foodCollection.findOne(food_query)
+            const food_updateDoc = { $set: { available_status: false } };
+            const result = await foodCollection.updateOne(food_query, food_updateDoc);
+            res.send(result);
+        })
+
+
+
 
 
 
