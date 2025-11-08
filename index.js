@@ -43,6 +43,13 @@ async function run() {
             res.send(result);
         });
 
+        //to post data
+        app.post("/foods", async (req, res) => {
+            const newFood = req.body;
+            const result = await foodCollection.insertOne(newFood);
+            res.send(result);
+        });
+
         
 
 
