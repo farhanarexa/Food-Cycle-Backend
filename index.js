@@ -91,6 +91,32 @@ async function run() {
         })
 
 
+        app.get("/my-foods", async (req, res) => {
+            try {
+                const email = req.query.email;
+
+                // Security: Always validate email is present
+                if (!email) {
+                    return res.status(400).json({ error: "Email query parameter is required" });
+                }
+
+                // Optional: Extra security - only allow users to fetch their own data
+                // (Uncomment if you add authentication middleware later)
+                // if (req.user?.email !== email) {
+                //   return res.status(403).json({ error: "You can only view your own foods" });
+                // }
+
+                const query = { email: email };
+                const myFoods = await foodCollection.find(query).sort({ _id: -1 }).toArray();
+
+                res.status(200).json(myFoods);
+            } catch (error) {
+                console.error("Error fetching my foods:", error);
+                res.status(500).json({ error: "Internal server error" });
+            }
+        });
+
+
         //to post data
         app.post("/foods", async (req, res) => {
             const data = req.body;
@@ -176,7 +202,7 @@ async function run() {
         })
 
 
-        
+
         //food request status update (rejected)
         app.patch("/foodRequestReject/:id", async (req, res) => {
             const food_request_id = req.params.id;
