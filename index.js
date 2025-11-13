@@ -164,6 +164,63 @@ async function run() {
         });
 
 
+        // Returns all requests made for a specific food
+        app.get("/food-requests-all/:foodId", async (req, res) => {
+            try {
+                const { foodId } = req.params;
+
+                // Validate ObjectId (optional but recommended)
+                if (!foodId.match(/^[0-9a-fA-F]{24}$/)) {
+                    return res.status(400).json({ error: "Invalid food ID" });
+                }
+
+                const requests = await foodRequestCollection
+                    .find({ food_id: foodId })
+                    .sort({ request_date: -1 })
+                    .toArray();
+
+                res.json(requests);
+            } catch (error) {
+                console.error("Error fetching requests:", error);
+                res.status(500).json({ error: "Failed to fetch requests" });
+            }
+        });
+
+
+        app.get("/my-all-food-requests", async (req, res) => {
+            try {
+                const email = req.query.email;
+
+                if (!email) {
+                    return res.status(400).json({ error: "Email is required" });
+                }
+
+                // Step 1️⃣ — Get all requests for this user
+                const myRequests = await foodRequestCollection.find({ userEmail: email }).toArray();
+
+                // Step 2️⃣ — For each request, get the food details
+                const results = [];
+                for (const reqItem of myRequests) {
+                    // Find the food using the food_id
+                    const food = await foodCollection.findOne({ _id: new ObjectId(reqItem.food_id) });
+
+                    // Add food info inside each request
+                    results.push({
+                        ...reqItem,
+                        foodDetails: food || null, // if food not found, keep null
+                    });
+                }
+
+                // Step 3️⃣ — Send final result
+                res.status(200).json(results);
+
+            } catch (error) {
+                console.error("Error fetching requests:", error);
+                res.status(500).json({ error: "Internal server error" });
+            }
+        });
+
+
 
         // food request post
         app.post("/foodRequest/:id", async (req, res) => {
@@ -212,6 +269,24 @@ async function run() {
             const result = await foodRequestCollection.updateOne(query, food_request_updateDoc);
             res.send(result);
         })
+
+
+
+        app.delete("/myFoodRequest/:id", async (req, res) => {
+            try {
+                const id = req.params.id;
+                console.log("Deleting request with id:", id);
+
+                const query = { _id: new ObjectId(id) };
+                const result = await foodRequestCollection.deleteOne(query);
+
+                res.send(result);
+            } catch (error) {
+                console.error("Error deleting food request:", error);
+                res.status(500).send({ error: "Internal server error" });
+            }
+        });
+
 
 
 
